@@ -21,6 +21,31 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Invoke-GitOutput {
+  param([string[]]$Arguments)
+  $oldPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $output = & git @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+  }
+  finally {
+    $ErrorActionPreference = $oldPreference
+  }
+  if ($exitCode -ne 0) {
+    throw "git $($Arguments -join ' ') failed with exit code $exitCode. $($output -join [Environment]::NewLine)"
+  }
+  return $output
+}
+
+function Invoke-Git {
+  param([string[]]$Arguments)
+  $output = Invoke-GitOutput $Arguments
+  if ($output) {
+    $output | ForEach-Object { Write-Host $_ }
+  }
+}
+
 function ConvertTo-Slug {
   param([string]$Value)
   $slug = $Value.ToLowerInvariant() -replace "[^a-z0-9._-]+", "-"
@@ -36,9 +61,14 @@ function Escape-SingleQuotedPowerShell {
   return $Value -replace "'", "''"
 }
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$isRepo = git -C $repoRoot rev-parse --is-inside-work-tree 2>$null
-if ($LASTEXITCODE -ne 0 -or $isRepo.Trim() -ne "true") {
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+try {
+  $isRepo = Invoke-GitOutput @("-C", $repoRoot, "rev-parse", "--is-inside-work-tree")
+}
+catch {
+  throw "Atlas is not a git repository yet. Run: git init -b main"
+}
+if (($isRepo | Select-Object -First 1).Trim() -ne "true") {
   throw "Atlas is not a git repository yet. Run: git init -b main"
 }
 
@@ -50,15 +80,12 @@ $worktreePath = Join-Path $worktreeRoot "$Agent-$timestamp-$slug"
 
 New-Item -ItemType Directory -Path $worktreeRoot -Force | Out-Null
 
-$dirty = git -C $repoRoot status --porcelain
+$dirty = Invoke-GitOutput @("-C", $repoRoot, "status", "--porcelain")
 if ($dirty) {
   Write-Warning "Main worktree has uncommitted changes. The new task branch will start from HEAD, not from those changes."
 }
 
-git -C $repoRoot worktree add -b $branch $worktreePath HEAD
-if ($LASTEXITCODE -ne 0) {
-  throw "Failed to create worktree."
-}
+Invoke-Git @("-C", $repoRoot, "worktree", "add", "-b", $branch, $worktreePath, "HEAD")
 
 $ownedFiles = if ($Files.Count -gt 0) { ($Files | ForEach-Object { "- $_" }) -join [Environment]::NewLine } else { "- Not specified; keep edits narrow and report changed files." }
 $taskFile = Join-Path $worktreePath "TASK.md"
