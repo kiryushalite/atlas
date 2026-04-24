@@ -38,7 +38,17 @@ Purpose: provide the backend behavior that Dev Hub will later call from an app U
 - `scripts/Atlas-AgentConsole.ps1` - interactive console with `claude`, `codex`, `both`, `status`, `watch`, `review`, `merge`, `shell`.
 - Desktop shortcut: `C:\Users\yu9lite\Desktop\Atlas Agent Console.lnk`.
 
-Purpose: usable prototype while the real Dev Hub app is not built yet.
+Purpose: usable prototype kept as a fallback now that the real Dev Hub app exists.
+
+## Atlas Dev Hub App
+
+- `../atlas-dev-hub/` - separate local Tauri + React orchestration app.
+- `../Start Atlas Dev Hub.cmd` - development launcher.
+- `C:\Users\yu9lite\Desktop\Atlas Dev Hub.lnk` - desktop shortcut to the built Windows app.
+- `../atlas-dev-hub/src-tauri/target/release/atlas-dev-hub.exe` - built local Windows executable.
+- `../atlas-dev-hub/src-tauri/target/release/bundle/` - generated installer packages.
+
+Purpose: one local control surface for launching Codex and Claude worker tasks, reading agent logs/events, configuring Kimi/Perplexity API access, and pausing heavy work when usage is near 70-80%.
 
 ## Shared Agent Bus
 

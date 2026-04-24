@@ -18,10 +18,11 @@ Current status:
 - It reports `codex-cli 0.124.0-alpha.2` and supports `codex exec`.
 - `scripts/Start-CodexBackgroundTask.ps1` starts Codex CLI workers in isolated worktrees.
 - Smoke test proved read-only background execution works and produces a final report.
+- `../atlas-dev-hub` now exposes Codex worker launch from a local Tauri app.
 
 Acceptance criteria:
 
-- Dev Hub can start Codex workers directly, not only create inbox files. Done in script prototype.
+- Dev Hub can start Codex workers directly, not only create inbox files. Done.
 - Codex workers run in isolated git worktrees. Done in script prototype.
 - Codex workers write logs and final reports into `.agent-runs/<run-id>/`. Done in script prototype.
 - Review and plan tasks run read-only. Done in script prototype.
@@ -30,16 +31,23 @@ Acceptance criteria:
 
 Remaining P0 work:
 
-- Move the script prototype into the separate Dev Hub Tauri app.
 - Handle Codex sandbox ownership warnings cleanly.
 - Keep the inbox fallback for machines where the callable LocalCache CLI path is absent.
+- Add interactive/streaming Codex sessions when a stable CLI/API path exposes them.
 
 ## P1 - Turn Console Prototype Into A Dev App
 
-- Create separate `atlas-dev-hub` Tauri app next to `atlas-v0`.
-- Move the current PowerShell backend into a proper native command layer.
-- Show agents, tasks, branches, logs, tests, diffs, and merge state in one UI.
+- Create separate `atlas-dev-hub` Tauri app next to `atlas-v0`. Done.
+- Move the current PowerShell backend into a proper native command layer. Started.
+- Show agents, tasks, branches, logs, tests, diffs, and merge state in one UI. Started; diffs and merge state still need richer UI.
 - Keep Atlas untouched as the product app.
+
+## P1.5 - Self-Editing Dev Hub
+
+- Allow tasks to target `atlas-dev-hub` itself through separate branches/worktrees.
+- Add frontend live preview for Vite hot reload.
+- Require app restart for Rust/Tauri command changes.
+- Show file watcher events, process trees, git diffs, and run logs so agent activity is inspectable.
 
 ## P2 - Add Research Providers
 
