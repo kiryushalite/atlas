@@ -120,7 +120,7 @@ Set-Location -LiteralPath "$worktree"
 `$promptText = Get-Content -LiteralPath "$promptPath" -Raw
 `$addDirs = @("$worktree", "$BusRoot")
 if ("$FullPcAccess" -eq "True") { `$addDirs += "$pcAccessRoot" }
-claude --add-dir `$addDirs --print --model "$Model" --permission-mode "$PermissionMode" --max-budget-usd "$MaxBudgetUsd" `$promptText *>&1 | Tee-Object -FilePath "$logPath" -Append | Tee-Object -FilePath "$reportPath"
+`$promptText | claude --add-dir `$addDirs --print --input-format text --model "$Model" --permission-mode "$PermissionMode" --max-budget-usd "$MaxBudgetUsd" *>&1 | Tee-Object -FilePath "$logPath" -Append | Tee-Object -FilePath "$reportPath"
 `$exitCode = `$LASTEXITCODE
 "EXIT_CODE `$exitCode" | Tee-Object -FilePath "$logPath" -Append
 "FINISHED $(Get-Date -Format o)" | Tee-Object -FilePath "$logPath" -Append
