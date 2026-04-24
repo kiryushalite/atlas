@@ -47,11 +47,11 @@ else {
 }
 
 Write-Host ""
-Write-Host "== Claude Runs =="
+Write-Host "== Agent Runs =="
 $runRoot = Join-Path $repoRoot ".agent-runs"
 $runs = Get-ChildItem -LiteralPath $runRoot -Filter run.json -Recurse -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
 if (-not $runs) {
-  Write-Host "No Claude background runs."
+  Write-Host "No background runs."
   return
 }
 
@@ -62,6 +62,6 @@ foreach ($run in $runs) {
     $isRunning = [bool](Get-Process -Id $metadata.pid -ErrorAction SilentlyContinue)
   }
   $status = if ($isRunning) { "running" } else { "stopped" }
-  Write-Host "$($metadata.runId) [$status] branch=$($metadata.branch) pid=$($metadata.pid)"
+  Write-Host "$($metadata.runId) [$status] agent=$($metadata.agent) branch=$($metadata.branch) pid=$($metadata.pid)"
   Write-Host "  log=$($metadata.log)"
 }

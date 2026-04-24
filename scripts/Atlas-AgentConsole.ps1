@@ -53,7 +53,7 @@ function Show-Help {
   Write-Host "Commands:"
   Write-Host "  help       Show this help"
   Write-Host "  claude     Create a background Claude Code task"
-  Write-Host "  codex      Create a Codex inbox task and worktree"
+  Write-Host "  codex      Create a background Codex CLI task"
   Write-Host "  both       Split work into one Claude task and one Codex task"
   Write-Host "  status     Show main branch, worktrees, agent branches, Claude runs"
   Write-Host "  watch      Show a Claude run log"
@@ -84,10 +84,14 @@ function New-CodexTask {
     Write-Host "No task text."
     return
   }
-  & (Join-Path $PSScriptRoot "New-CodexInboxTask.ps1") -Name $name -Task $task -BusRoot $busRoot
-  Write-Host ""
-  Write-Host "Codex desktop CLI is currently not callable from PowerShell on this machine."
-  Write-Host "The task is ready in the Codex inbox; ask Codex in the desktop chat to read the printed CODEX_INBOX_FILE."
+  try {
+    & (Join-Path $PSScriptRoot "Start-CodexBackgroundTask.ps1") -Name $name -Task $task -BusRoot $busRoot -FullPcAccess
+  }
+  catch {
+    Write-Host "Direct Codex worker failed: $($_.Exception.Message)"
+    Write-Host "Falling back to Codex inbox bridge."
+    & (Join-Path $PSScriptRoot "New-CodexInboxTask.ps1") -Name $name -Task $task -BusRoot $busRoot
+  }
 }
 
 function New-BothTasks {
@@ -98,7 +102,14 @@ function New-BothTasks {
     & (Join-Path $PSScriptRoot "Start-ClaudeBackgroundTask.ps1") -Name "$baseName-claude" -Task $claudeTask -BusRoot $busRoot -FullPcAccess
   }
   if (-not [string]::IsNullOrWhiteSpace($codexTask)) {
-    & (Join-Path $PSScriptRoot "New-CodexInboxTask.ps1") -Name "$baseName-codex" -Task $codexTask -BusRoot $busRoot
+    try {
+      & (Join-Path $PSScriptRoot "Start-CodexBackgroundTask.ps1") -Name "$baseName-codex" -Task $codexTask -BusRoot $busRoot -FullPcAccess
+    }
+    catch {
+      Write-Host "Direct Codex worker failed: $($_.Exception.Message)"
+      Write-Host "Falling back to Codex inbox bridge."
+      & (Join-Path $PSScriptRoot "New-CodexInboxTask.ps1") -Name "$baseName-codex" -Task $codexTask -BusRoot $busRoot
+    }
   }
 }
 
@@ -157,23 +168,12 @@ function Show-Diagnostics {
   Write-Host ""
   Write-Host "Codex CLI:"
   try {
-    $codexPath = (Get-Command codex -ErrorAction Stop).Source
+    $codexPath = (Get-Command (Join-Path $env:LOCALAPPDATA "Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\OpenAI\Codex\bin\codex.exe") -ErrorAction Stop).Source
     Write-Host $codexPath
-    try {
-      codex --help *> $null
-      if ($LASTEXITCODE -eq 0) {
-        Write-Host "Codex CLI is callable from this console."
-      }
-      else {
-        Write-Host "Codex CLI returned exit code $LASTEXITCODE."
-      }
-    }
-    catch {
-      Write-Host "Codex CLI is installed, but Windows blocks direct console launch here. Use the Codex inbox bridge."
-    }
+    & $codexPath --version
   }
   catch {
-    Write-Host "Codex CLI was not found."
+    Write-Host "Callable Codex CLI was not found. Inbox bridge remains available."
   }
 }
 

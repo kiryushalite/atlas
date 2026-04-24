@@ -13,7 +13,8 @@ Open:
 The console provides one command surface for:
 
 - launching Claude Code background workers;
-- creating Codex inbox tasks and worktrees;
+- launching Codex CLI background workers;
+- creating Codex inbox tasks as a fallback;
 - checking worktree/branch/run status;
 - watching Claude logs;
 - reviewing and merging branches;
@@ -103,10 +104,14 @@ Plan-only Claude branch:
 
 ## Codex Branches
 
-For Codex work, create a branch/worktree but do not launch Claude:
+For Codex background work:
 
 ```powershell
-.\scripts\Start-AgentTask.ps1 -Agent codex -Name "quick-add-tests" -Task "Add focused tests for Quick Add parsing." -NoLaunch
+.\scripts\Start-CodexBackgroundTask.ps1 -Name "quick-add-tests" -Task "Add focused tests for Quick Add parsing."
 ```
 
-Then point Codex at the printed worktree path.
+For fallback Codex inbox work when direct CLI launch is unavailable:
+
+```powershell
+.\scripts\New-CodexInboxTask.ps1 -Name "quick-add-tests" -Task "Add focused tests for Quick Add parsing."
+```
