@@ -45,3 +45,23 @@ if ($branches) {
 else {
   Write-Host "No agent branches."
 }
+
+Write-Host ""
+Write-Host "== Claude Runs =="
+$runRoot = Join-Path $repoRoot ".agent-runs"
+$runs = Get-ChildItem -LiteralPath $runRoot -Filter run.json -Recurse -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+if (-not $runs) {
+  Write-Host "No Claude background runs."
+  return
+}
+
+foreach ($run in $runs) {
+  $metadata = Get-Content -LiteralPath $run.FullName -Raw | ConvertFrom-Json
+  $isRunning = $false
+  if ($metadata.pid) {
+    $isRunning = [bool](Get-Process -Id $metadata.pid -ErrorAction SilentlyContinue)
+  }
+  $status = if ($isRunning) { "running" } else { "stopped" }
+  Write-Host "$($metadata.runId) [$status] branch=$($metadata.branch) pid=$($metadata.pid)"
+  Write-Host "  log=$($metadata.log)"
+}

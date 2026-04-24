@@ -11,6 +11,7 @@ src-tauri/gen/
 
 TASK.md
 .agent/
+.agent-runs/
 
 .env
 .env.*

@@ -2,6 +2,29 @@
 
 Atlas should be developed through isolated git worktrees so Codex and Claude Code can work in parallel without stepping on each other.
 
+## One-Window Console
+
+Open:
+
+```powershell
+.\Atlas Agent Console.cmd
+```
+
+The console provides one command surface for:
+
+- launching Claude Code background workers;
+- creating Codex inbox tasks and worktrees;
+- checking worktree/branch/run status;
+- watching Claude logs;
+- reviewing and merging branches;
+- running local PowerShell commands after confirmation.
+
+Shared coordination files live outside the repo:
+
+```text
+..\atlas-v0-agent-bus
+```
+
 ## Daily Flow
 
 1. Keep `main` as the clean baseline.
@@ -58,6 +81,18 @@ Headless Claude worker, useful when Codex is orchestrating:
 
 ```powershell
 .\scripts\Start-AgentTask.ps1 -Agent claude -Name "notes-search" -Task "Add local notes search." -Headless
+```
+
+Background Claude worker, preferred for one-window orchestration:
+
+```powershell
+.\scripts\Start-ClaudeBackgroundTask.ps1 -Name "notes-search" -Task "Add local notes search."
+```
+
+Watch a background run:
+
+```powershell
+.\scripts\Watch-ClaudeRun.ps1 -RunId 20260425-033000-notes-search
 ```
 
 Plan-only Claude branch:
