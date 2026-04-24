@@ -18,7 +18,13 @@ Atlas should be developed through isolated git worktrees so Codex and Claude Cod
    .\scripts\Review-AgentBranch.ps1 -Branch agent/claude/20260425-031500-task-editor
    ```
 
-5. Merge only after checks pass:
+5. Check the whole agent board:
+
+   ```powershell
+   .\scripts\Get-AgentStatus.ps1
+   ```
+
+6. Merge only after checks pass:
 
    ```powershell
    .\scripts\Merge-AgentBranch.ps1 -Branch agent/claude/20260425-031500-task-editor -RunTests
