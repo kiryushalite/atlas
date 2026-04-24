@@ -9,6 +9,9 @@ src-tauri/gen/
 *.tmp
 *.bak
 
+TASK.md
+.agent/
+
 .env
 .env.*
 !.env.example
