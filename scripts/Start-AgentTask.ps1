@@ -122,9 +122,9 @@ $ownedFiles
 "@
 Set-Content -LiteralPath $taskFile -Value $taskMarkdown -Encoding UTF8
 
-Write-Host "BRANCH=$branch"
-Write-Host "WORKTREE=$worktreePath"
-Write-Host "TASK_FILE=$taskFile"
+Write-Output "BRANCH=$branch"
+Write-Output "WORKTREE=$worktreePath"
+Write-Output "TASK_FILE=$taskFile"
 
 if ($Agent -eq "codex") {
   Write-Host ""
