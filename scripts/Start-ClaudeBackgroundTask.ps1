@@ -27,8 +27,9 @@ $ErrorActionPreference = "Stop"
 
 function ConvertTo-Slug {
   param([string]$Value)
-  $slug = $Value.ToLowerInvariant() -replace "[^a-z0-9._-]+", "-"
+  $slug = $Value.ToLowerInvariant() -replace "[^a-z0-9-]+", "-"
   $slug = $slug.Trim("-")
+  $slug = $slug -replace "-{2,}", "-"
   if ([string]::IsNullOrWhiteSpace($slug)) {
     return "claude-task"
   }

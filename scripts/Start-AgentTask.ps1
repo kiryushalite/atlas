@@ -48,8 +48,9 @@ function Invoke-Git {
 
 function ConvertTo-Slug {
   param([string]$Value)
-  $slug = $Value.ToLowerInvariant() -replace "[^a-z0-9._-]+", "-"
+  $slug = $Value.ToLowerInvariant() -replace "[^a-z0-9-]+", "-"
   $slug = $slug.Trim("-")
+  $slug = $slug -replace "-{2,}", "-"
   if ([string]::IsNullOrWhiteSpace($slug)) {
     return "task"
   }
@@ -83,6 +84,11 @@ New-Item -ItemType Directory -Path $worktreeRoot -Force | Out-Null
 $dirty = Invoke-GitOutput @("-C", $repoRoot, "status", "--porcelain")
 if ($dirty) {
   Write-Warning "Main worktree has uncommitted changes. The new task branch will start from HEAD, not from those changes."
+}
+
+$refCheck = & git -C $repoRoot check-ref-format --branch $branch 2>&1
+if ($LASTEXITCODE -ne 0) {
+  throw "Generated branch name '$branch' is not a valid git ref. Ref check: $refCheck"
 }
 
 Invoke-Git @("-C", $repoRoot, "worktree", "add", "-b", $branch, $worktreePath, "HEAD")
